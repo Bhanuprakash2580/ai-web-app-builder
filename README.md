@@ -6,10 +6,11 @@ NxtBuild is a cutting-edge, AI-powered web app generator. It allows users to ins
 
 ## 📸 Screenshots
 
-### 🏠 Landing Page & 🔐 Login
-> Split-layout design — marketing content on the left, login form on the right
+### 🏠 Landing Page
+![Landing Page](./screenshots/landing.png)
 
-![Landing and Login Page](./screenshots/login.png)
+### 🔐 Login Page
+![Login Page](./screenshots/login.png)
 
 ### 📁 Dashboard
 ![Dashboard](./screenshots/dashboard.png)

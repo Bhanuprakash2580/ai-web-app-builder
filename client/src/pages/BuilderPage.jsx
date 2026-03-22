@@ -18,10 +18,10 @@ import { generateCode } from '../services/generationService.js';
 import '../styles/builder.css';
 
 const EXAMPLE_PROMPTS = [
-  'Landing page for a coffee shop',
-  'Personal portfolio site',
-  'To-do list app',
-  'Calculator with dark theme',
+  'Build a personal portfolio site',
+  'SaaS pricing landing page',
+  'Task manager with dark theme',
+  'Responsive calculator app',
 ];
 
 function BuilderPage() {
@@ -90,6 +90,13 @@ function BuilderPage() {
       if (result.generatedCode) {
         setCode(result.generatedCode);
         setActiveTab('preview');
+      }
+
+      if (result.newVersion) {
+        setProject(prev => ({
+          ...prev,
+          versions: [...(prev.versions || []), result.newVersion]
+        }));
       }
 
       if (project.title === 'Untitled Project') {

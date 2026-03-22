@@ -15,8 +15,18 @@ const authenticate = async (req, res, next) => {
 
   try {
     const decoded = verifyToken(token);
-
-    const user = await User.findById(decoded.id).select('-password');
+    
+    let user;
+    if (process.env.MOCK_DB === 'true') {
+      user = {
+        _id: decoded.id,
+        id: decoded.id,
+        name: decoded.name || 'Demo User',
+        email: decoded.email,
+      };
+    } else {
+      user = await User.findById(decoded.id).select('-password');
+    }
 
     if (!user) {
       return res.status(401).json({

@@ -85,4 +85,4 @@ function SharedPage() {
   );
 }
 
-export default SharedProjectPage;
+export default SharedPage;

@@ -15,6 +15,16 @@ export const createProject = async (data = {}) => {
   return response.data.data;
 };
 
+export const updateProject = async (id, data) => {
+  const response = await api.put(`/projects/${id}`, data);
+  return response.data.data;
+};
+
+export const deleteProject = async (id) => {
+  const response = await api.delete(`/projects/${id}`);
+  return response.data.data;
+};
+
 export const toggleProjectShare = async (id) => {
   const response = await api.post(`/projects/${id}/share`);
   return response.data.data;

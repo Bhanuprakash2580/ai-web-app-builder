@@ -37,6 +37,9 @@ export const loginUser = async (req, res, next) => {
 
 export const getMe = async (req, res, next) => {
   try {
+    if (process.env.MOCK_DB === 'true') {
+      return res.json({ success: true, data: req.user });
+    }
     const user = await authService.getUserProfile(req.user._id);
     return res.json({ success: true, data: user });
   } catch (error) {

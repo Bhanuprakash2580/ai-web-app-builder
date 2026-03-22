@@ -14,12 +14,11 @@ const MOCK_USER = {
 
 export const register = async (name, email, password) => {
   if (process.env.MOCK_DB === 'true') {
-    const token = generateToken(MOCK_USER);
-    return { token, user: { id: MOCK_USER.id, email: MOCK_USER.email, name: MOCK_USER.name } };
+    const token = generateToken({ ...MOCK_USER, name: name || 'Demo User', email: email || 'demo@example.com' });
+    return { token, user: { id: MOCK_USER.id, email: email || 'demo@example.com', name: name || 'Demo User' } };
   }
 
   const existing = await User.findOne({ email });
-// ... existing code ...
   if (existing) {
     const error = new Error('Email already registered.');
     error.statusCode = 409;
@@ -40,8 +39,8 @@ export const register = async (name, email, password) => {
 
 export const emailLogin = async (email, password) => {
   if (process.env.MOCK_DB === 'true') {
-    const token = generateToken(MOCK_USER);
-    return { token, user: { id: MOCK_USER.id, email: MOCK_USER.email, name: MOCK_USER.name } };
+    const token = generateToken({ ...MOCK_USER, name: name || 'Demo User', email: email || 'demo@example.com' });
+    return { token, user: { id: MOCK_USER.id, email: email || 'demo@example.com', name: name || 'Demo User' } };
   }
 
   const user = await User.findOne({ email });
@@ -74,7 +73,7 @@ export const getUserProfile = async (userId) => {
     return {
       id: MOCK_USER.id,
       email: MOCK_USER.email,
-      name: MOCK_USER.name,
+      name: 'Demo User', // In mock profile, we use default
       createdAt: MOCK_USER.createdAt,
       lastLogin: MOCK_USER.lastLogin,
     };

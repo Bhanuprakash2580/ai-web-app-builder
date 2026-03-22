@@ -1,138 +1,98 @@
-import Project from '../models/Project.model.js';
+import * as projectService from '../services/project.service.js';
 
-export const getUserProjects = async (userId) => {
-  const projects = await Project.find({ userId }).sort({ updatedAt: -1 });
-  return projects;
-};
-
-export const getProjectById = async (projectId, userId) => {
-  const project = await Project.findOne({ _id: projectId, userId });
-  if (!project) {
-    const error = new Error('Project not found.');
-    error.statusCode = 404;
-    throw error;
+export const getUserProjects = async (req, res, next) => {
+  try {
+    const projects = await projectService.getUserProjects(req.user._id);
+    return res.json({ success: true, data: projects });
+  } catch (error) {
+    next(error);
   }
-  return project;
 };
 
-export const createProject = async (userId, title) => {
-  const project = await Project.create({
-    userId,
-    title: title || 'Untitled Project',
-    messages: [],
-    generatedCode: '',
-    versions: [],
-  });
-  return project;
-};
-
-export const updateProject = async (projectId, userId, updates) => {
-  const project = await Project.findOne({ _id: projectId, userId });
-  if (!project) {
-    const error = new Error('Project not found.');
-    error.statusCode = 404;
-    throw error;
+export const getProjectById = async (req, res, next) => {
+  try {
+    const project = await projectService.getProjectById(req.params.id, req.user._id);
+    return res.json({ success: true, data: project });
+  } catch (error) {
+    if (error.statusCode) return res.status(error.statusCode).json({ success: false, message: error.message });
+    next(error);
   }
-
-  if (updates.title !== undefined) project.title = updates.title;
-  if (updates.description !== undefined) project.description = updates.description;
-  if (updates.generatedCode !== undefined) project.generatedCode = updates.generatedCode;
-  if (updates.messages !== undefined) project.messages = updates.messages;
-
-  project.updatedAt = new Date();
-  await project.save();
-  return project;
 };
 
-export const deleteProject = async (projectId, userId) => {
-  const project = await Project.findOneAndDelete({ _id: projectId, userId });
-  if (!project) {
-    const error = new Error('Project not found.');
-    error.statusCode = 404;
-    throw error;
+export const createProject = async (req, res, next) => {
+  try {
+    const { title } = req.body;
+    const project = await projectService.createProject(req.user._id, title);
+    return res.status(201).json({ success: true, data: project });
+  } catch (error) {
+    next(error);
   }
-  return { message: 'Project deleted successfully.' };
 };
 
-export const toggleProjectPublic = async (projectId, userId) => {
-  const project = await Project.findOne({ _id: projectId, userId });
-  if (!project) {
-    const error = new Error('Project not found.');
-    error.statusCode = 404;
-    throw error;
+export const updateProject = async (req, res, next) => {
+  try {
+    const project = await projectService.updateProject(req.params.id, req.user._id, req.body);
+    return res.json({ success: true, data: project });
+  } catch (error) {
+    if (error.statusCode) return res.status(error.statusCode).json({ success: false, message: error.message });
+    next(error);
   }
-  
-  project.isPublic = !project.isPublic;
-  await project.save();
-  return { isPublic: project.isPublic };
 };
 
-export const getSharedProject = async (projectId) => {
-  const project = await Project.findOne({ _id: projectId });
-  if (!project) {
-    const error = new Error('Project not found.');
-    error.statusCode = 404;
-    throw error;
+export const deleteProject = async (req, res, next) => {
+  try {
+    const result = await projectService.deleteProject(req.params.id, req.user._id);
+    return res.json({ success: true, data: result });
+  } catch (error) {
+    if (error.statusCode) return res.status(error.statusCode).json({ success: false, message: error.message });
+    next(error);
   }
-  if (!project.isPublic) {
-    const error = new Error('This project is private.');
-    error.statusCode = 403;
-    throw error;
+};
+
+export const getVersionHistory = async (req, res, next) => {
+  try {
+    const versions = await projectService.getProjectVersions(req.params.id, req.user._id);
+    return res.json({ success: true, data: versions });
+  } catch (error) {
+    next(error);
   }
-  
-  return project;
 };
 
-// --- NEW SPEC-COMPLIANT CONTROLLERS ---
-
-export const getVersionHistory = async (projectId, userId) => {
-  const project = await Project.findOne({ _id: projectId, userId });
-  if (!project) throw new Error('Project not found');
-  return project.versions;
-};
-
-export const restoreVersion = async (projectId, userId, versionIndex) => {
-  const project = await Project.findOne({ _id: projectId, userId });
-  if (!project) throw new Error('Project not found');
-  
-  const version = project.versions[versionIndex];
-  if (!version) throw new Error('Version index out of bounds');
-
-  project.generatedCode = version.code;
-  project.messages.push({
-    role: 'assistant',
-    content: `⏪ Restored to version "${version.prompt}"`,
-    timestamp: new Date()
-  });
-  
-  await project.save();
-  return project;
-};
-
-export const enableSharing = async (projectId, userId) => {
-  const project = await Project.findOne({ _id: projectId, userId });
-  if (!project) throw new Error('Project not found');
-  
-  project.isPublic = true;
-  await project.save();
-  return { isPublic: true, shareId: project.shareId };
-};
-
-export const disableSharing = async (projectId, userId) => {
-  const project = await Project.findOne({ _id: projectId, userId });
-  if (!project) throw new Error('Project not found');
-  
-  project.isPublic = false;
-  await project.save();
-  return { isPublic: false };
-};
-
-export const getPublicProjectByShareId = async (shareId) => {
-  const project = await Project.findOne({ shareId, isPublic: true });
-  if (!project) {
-    const error = new Error('Project not found or private');
-    error.statusCode = 404;
-    throw error;
+export const restoreVersion = async (req, res, next) => {
+  try {
+    const { index } = req.body;
+    const project = await projectService.restoreProjectVersion(req.params.id, req.user._id, index);
+    return res.json({ success: true, data: project });
+  } catch (error) {
+    next(error);
   }
-  return project;
+};
+
+export const enableSharing = async (req, res, next) => {
+  try {
+    const project = await projectService.toggleProjectShare(req.params.id, req.user._id);
+    return res.json({ success: true, data: project });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const disableSharing = async (req, res, next) => {
+  try {
+    const project = await projectService.deleteProjectShare(req.params.id, req.user._id);
+    return res.json({ success: true, data: project });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPublicProjectByShareId = async (req, res, next) => {
+  try {
+    const { shareId } = req.params;
+    const project = await projectService.getPublicProjectByShareId(shareId);
+    if (!project) return res.status(404).json({ success: false, message: 'Project not found or private' });
+    return res.json({ success: true, data: project });
+  } catch (error) {
+    next(error);
+  }
 };

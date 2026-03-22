@@ -8,12 +8,16 @@ const VersionPanel = ({ versions, onRestore, onClose }) => {
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>×</button>
       </div>
       <div className="versions-list">
-        {versions?.map((v, i) => (
-          <div key={i} className="version-item" onClick={() => onRestore(i)} title={v.prompt}>
-            <div className="version-title">v{i + 1}: {v.prompt.length > 25 ? v.prompt.substring(0, 25) + '...' : v.prompt}</div>
-            <div className="version-time">{new Date(v.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-          </div>
-        ))}
+        {versions?.map((v, i) => {
+          const promptText = v.prompt || v.label || `Version ${i + 1}`;
+          const timeText = v.createdAt || v.timestamp || new Date();
+          return (
+            <div key={i} className="version-item" onClick={() => onRestore(i)} title={promptText}>
+              <div className="version-title">v{i + 1}: {promptText.length > 25 ? promptText.substring(0, 25) + '...' : promptText}</div>
+              <div className="version-time">{new Date(timeText).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

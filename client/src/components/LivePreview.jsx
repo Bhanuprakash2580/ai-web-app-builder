@@ -3,14 +3,15 @@ function LivePreview({ code }) {
     return (
       <div style={{
         background: '#f8f8ff',
+        width: '100%',
         height: '100%',
+        flex: 1,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         textAlign: 'center',
         gap: '16px',
-        borderRadius: '12px'
       }}>
         <div style={{ fontSize: '48px' }}>✨</div>
         <h3 style={{ color: '#0f0f17', fontSize: '18px', fontWeight: '700' }}>Your app will appear here</h3>
@@ -20,16 +21,14 @@ function LivePreview({ code }) {
   }
 
   return (
-    <iframe
-      srcDoc={code}
-      width="100%"
-      height="100%"
-      style={{ border: 'none', display: 'block' }}
-      sandbox="allow-scripts"
-      title="Live Preview"
-      className="preview-iframe"
-    />
+    <div className="preview-area">
+      <iframe
+        srcDoc={code}
+        title="preview"
+        sandbox="allow-scripts"
+      />
+    </div>
   );
 }
 
-export default LivePreview;
+export default LivePreview;

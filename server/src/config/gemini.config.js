@@ -1,19 +1,23 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+// server/src/config/gemini.config.js
+import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error('GEMINI_API_KEY is missing from .env file');
+}
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
+const MODEL_NAME = "gemini-2.5-flash";
 
 console.log('Gemini API Key loaded:', process.env.GEMINI_API_KEY ? 'YES' : 'NO - CHECK .env');
+console.log('Gemini Model:', MODEL_NAME);
 
-const generateContent = async (prompt) => {
-  try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
-  } catch (error) {
-    console.error("Gemini API Error:", error.message);
-    throw new Error(`Gemini API failed: ${error.message}`);
-  }
+export const generateContent = async (prompt) => {
+  const response = await ai.models.generateContent({
+    model: MODEL_NAME,
+    contents: prompt,
+  });
+  return response.text;
 };
-
-export { generateContent };

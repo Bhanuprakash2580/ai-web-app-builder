@@ -1,49 +1,56 @@
+// server/src/services/generation.service.js
 import { askGemini } from './gemini.service.js';
 import { getProjectById } from './project.service.js';
 import { buildGenerationPrompt } from '../constants/prompts.js';
 import { parseGenerationResponse } from '../utils/code.utils.js';
 
 export const generateCode = async (projectId, userId, userPrompt) => {
+  // Get real project from MongoDB
   const project = await getProjectById(projectId, userId);
 
+  // Build prompt with conversation history
   const fullPrompt = buildGenerationPrompt(
     project.messages,
     project.generatedCode,
     userPrompt
   );
 
+  // Call REAL Gemini API — NO mock fallback here
   const aiResponse = await askGemini(fullPrompt);
 
-  const { description, code } = parseGenerationResponse(aiResponse);
+  // Parse the response
+  const { code, description } = parseGenerationResponse(aiResponse);
 
+  // Save user message
   project.messages.push({
     role: 'user',
     content: userPrompt,
-    timestamp: new Date(),
+    timestamp: new Date()
   });
 
+  // Save assistant message
   project.messages.push({
     role: 'assistant',
-    content: description || 'Here is your generated code.',
-    timestamp: new Date(),
+    content: description || 'Here is your generated app.',
+    timestamp: new Date()
   });
 
-  if (project.generatedCode && code) {
+  // Save version history
+  if (project.generatedCode) {
     project.versions.push({
       code: project.generatedCode,
       prompt: userPrompt,
       createdAt: new Date(),
+      label: `Version ${project.versions.length + 1}`
     });
   }
 
-  if (code) {
-    project.generatedCode = code;
-  }
+  // Update generated code
+  project.generatedCode = code;
 
-  if (project.title === 'Untitled Project' && project.messages.length <= 2) {
-    project.title = userPrompt.length > 50
-      ? userPrompt.substring(0, 50) + '...'
-      : userPrompt;
+  // Auto set title from first prompt
+  if (!project.title || project.title === 'Untitled Project') {
+    project.title = userPrompt.slice(0, 50);
   }
 
   project.updatedAt = new Date();
@@ -52,10 +59,11 @@ export const generateCode = async (projectId, userId, userPrompt) => {
   return {
     message: {
       role: 'assistant',
-      content: description || 'Here is your generated code.',
-      timestamp: new Date(),
+      content: description || 'Here is your generated app.',
+      timestamp: new Date()
     },
-    generatedCode: project.generatedCode,
-    versionIndex: project.versions.length,
+    generatedCode: code,
+    title: project.title,
+    newVersion: project.versions[project.versions.length - 1]
   };
 };
