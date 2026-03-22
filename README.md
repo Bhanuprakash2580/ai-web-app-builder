@@ -7,28 +7,28 @@ NxtBuild is a cutting-edge, AI-powered web app generator. It allows users to ins
 ## 📸 Screenshots
 
 ### 🏠 Landing Page
-![Landing Page](./screenshots/landing.png)
+<img width="2560" height="1600" alt="Screenshot 2026-03-22 212018" src="https://github.com/user-attachments/assets/3c98b971-5bdb-4869-b17d-1282be81739a" />
 
 ### 🔐 Login Page
-![Login Page](./screenshots/login.png)
+<img width="2560" height="1600" alt="Screenshot 2026-03-22 212027" src="https://github.com/user-attachments/assets/3b8f35ac-89dd-4db0-9e00-3ae442c5841f" />
 
 ### 📁 Dashboard
-![Dashboard](./screenshots/dashboard.png)
+<img width="2560" height="1600" alt="Screenshot 2026-03-23 012049" src="https://github.com/user-attachments/assets/0f0cdb09-9010-478b-beb2-fa02b691c616" />
 
 ### ⚡ Builder — Live Preview
-![Builder Preview](./screenshots/builder-preview.png)
+<img width="2560" height="1600" alt="Screenshot 2026-03-23 023137" src="https://github.com/user-attachments/assets/cc898076-820e-4c01-8451-00de40de4d06" />
 
 ### 💻 Builder — Code View
-![Builder Code](./screenshots/builder-code.png)
+<img width="2560" height="1600" alt="Screenshot 2026-03-23 022800" src="https://github.com/user-attachments/assets/25c13fcf-37aa-4204-a008-752ca0266360" />
 
 ### 🕐 Version History Panel
-![Version History](./screenshots/version-history.png)
+<img width="1001" height="449" alt="Screenshot 2026-03-23 023608" src="https://github.com/user-attachments/assets/0d01a184-765f-407c-8cc9-ec6d5d70ab00" />
 
 ### 🔗 Share Feature
-![Share Feature](./screenshots/share.png)
+<img width="817" height="431" alt="Screenshot 2026-03-23 023618" src="https://github.com/user-attachments/assets/f65e7f3b-457b-4748-98c7-6c00269e031f" />
 
 ### ✨ Prompt Templates
-![Prompt Templates](./screenshots/templates.png)
+<img width="1436" height="275" alt="Screenshot 2026-03-23 023245" src="https://github.com/user-attachments/assets/9bf6ed99-f4ab-4805-92dd-069b64bd359f" />
 
 ---
 
