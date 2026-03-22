@@ -1,0 +1,14 @@
+{
+  "name": "ai-powered-web-app-builder-root",
+  "version": "1.0.0",
+  "description": "Root package to manage client and server",
+  "private": true,
+  "scripts": {
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "dev": "npm run dev:server & npm run dev:client",
+    "build": "cd server && npm run build & cd client && npm run build",
+    "test-db": "cd server && node test-db.js",
+    "install:all": "cd server && npm install && cd ../client && npm install"
+  }
+}
