@@ -1,10 +1,19 @@
 import { useState, useEffect, useContext, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ToastContext } from '../context/ToastContext.jsx';
 import ChatMessage from '../components/ChatMessage.jsx';
 import ChatInput from '../components/ChatInput.jsx';
 import CodeEditor from '../components/CodeEditor.jsx';
-import { getProject, updateProject } from '../services/projectService.js';
+import VersionPanel from '../components/VersionPanel.jsx';
+import ShareModal from '../components/ShareModal.jsx';
+import LivePreview from '../components/LivePreview.jsx';
+import { 
+  getProject, 
+  updateProject, 
+  toggleProjectShare, 
+  deleteProjectShare,
+  restoreProjectVersion 
+} from '../services/projectService.js';
 import { generateCode } from '../services/generationService.js';
 import '../styles/builder.css';
 
@@ -18,6 +27,7 @@ const EXAMPLE_PROMPTS = [
 function BuilderPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { showToast } = useContext(ToastContext);
   const messagesEndRef = useRef(null);
 
@@ -31,6 +41,8 @@ function BuilderPage() {
   const [editTitle, setEditTitle] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatInputValue, setChatInputValue] = useState('');
+  const [showVersions, setShowVersions] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   useEffect(() => {
     const loadProject = async () => {
@@ -54,6 +66,15 @@ function BuilderPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  // Auto-trigger prompt from Dashboard Templates
+  useEffect(() => {
+    const promptParam = searchParams.get('prompt');
+    if (promptParam && !pageLoading && project && messages.length === 0 && !loading) {
+      handleSend(promptParam);
+      setSearchParams({});
+    }
+  }, [searchParams, pageLoading, project, messages.length, loading]);
 
   const handleSend = async (prompt) => {
     if (loading) return;
@@ -99,6 +120,42 @@ function BuilderPage() {
       } catch {
         showToast('Failed to rename project.', 'error');
       }
+    }
+  };
+
+  const handleRestoreVersion = async (versionIndex) => {
+    try {
+      setLoading(true);
+      const data = await restoreProjectVersion(projectId, versionIndex);
+      setProject(data);
+      setMessages(data.messages);
+      setCode(data.generatedCode);
+      setShowVersions(false);
+      showToast('Version restored and saved!', 'success');
+    } catch (err) {
+      showToast('Failed to save restored version.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      let data;
+      if (project.isPublic) {
+        data = await deleteProjectShare(projectId);
+      } else {
+        data = await toggleProjectShare(projectId);
+      }
+      setProject(prev => ({ ...prev, isPublic: data.isPublic, shareId: data.shareId || prev.shareId }));
+      
+      if (data.isPublic) {
+        showToast('Project is now public!', 'success');
+      } else {
+        showToast('Project is now private.', 'success');
+      }
+    } catch (err) {
+      showToast('Failed to update share settings.', 'error');
     }
   };
 
@@ -229,6 +286,44 @@ function BuilderPage() {
           </div>
 
           <div className="workspace-global-actions">
+            <div style={{ position: 'relative' }}>
+              <button 
+                className={`secondary-action-btn ${showVersions ? 'active' : ''}`}
+                onClick={() => { setShowVersions(!showVersions); setShowShare(false); }}
+                disabled={!project?.versions?.length}
+                style={{ opacity: !project?.versions?.length ? 0.4 : 1 }}
+              >
+                <span className="tab-icon">🕒</span> Versions
+              </button>
+              
+              {showVersions && (
+                <VersionPanel 
+                  versions={project.versions} 
+                  onRestore={handleRestoreVersion} 
+                  onClose={() => setShowVersions(false)} 
+                />
+              )}
+            </div>
+
+            <div style={{ position: 'relative' }}>
+              <button 
+                className={`secondary-action-btn ${project?.isPublic ? 'active' : ''}`} 
+                onClick={() => { setShowShare(!showShare); setShowVersions(false); }}
+              >
+                <span className="tab-icon">{project?.isPublic ? '🔗' : '🌍'}</span> 
+                {project?.isPublic ? 'Shared' : 'Share'}
+              </button>
+
+              <ShareModal 
+                isOpen={showShare}
+                isPublic={project?.isPublic}
+                onToggle={handleShare}
+                onClose={() => setShowShare(false)}
+                shareId={project?.shareId}
+                projectId={projectId}
+              />
+            </div>
+
             <button 
               className="secondary-action-btn" 
               onClick={handleDownload}
@@ -255,35 +350,7 @@ function BuilderPage() {
 
         <div className="workspace-viewport">
           {activeTab === 'preview' ? (
-            <div className="preview-viewport">
-              {code ? (
-                <iframe
-                  srcDoc={code}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 'none', display: 'block' }}
-                  sandbox="allow-scripts"
-                  title="Live Preview"
-                  className="preview-iframe"
-                />
-              ) : (
-                <div style={{
-                  background: '#f8f8ff',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  gap: '16px',
-                  borderRadius: '12px'
-                }}>
-                  <div style={{ fontSize: '48px' }}>✨</div>
-                  <h3 style={{ color: '#0f0f17', fontSize: '18px', fontWeight: '700' }}>Your app will appear here</h3>
-                  <p style={{ color: '#64748b', fontSize: '14px' }}>Describe what you want to build in the chat</p>
-                </div>
-              )}
-            </div>
+            <LivePreview code={code} />
           ) : (
             <div className="editor-viewport">
               <CodeEditor code={code} onChange={setCode} readOnly={false} />

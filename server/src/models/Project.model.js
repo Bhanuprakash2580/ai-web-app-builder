@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { nanoid } from 'nanoid';
 
 const projectSchema = new mongoose.Schema({
   userId: {
@@ -30,6 +31,17 @@ const projectSchema = new mongoose.Schema({
   versions: {
     type: Array,
     default: [],
+  },
+
+  isPublic: {
+    type: Boolean,
+    default: false,
+  },
+  
+  shareId: {
+    type: String,
+    unique: true,
+    default: () => nanoid(10),
   },
 
   createdAt: {

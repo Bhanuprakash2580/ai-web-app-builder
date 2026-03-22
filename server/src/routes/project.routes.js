@@ -4,6 +4,26 @@ import * as projectController from '../controllers/project.controller.js';
 
 const router = Router();
 
+// Public routes (must be before authentication)
+router.get('/shared/:id', async (req, res, next) => {
+  try {
+    const data = await projectController.getSharedProject(req.params.id);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// NEW: Public route by shareId (matches README)
+router.get('/public/share/:shareId', async (req, res, next) => {
+  try {
+    const data = await projectController.getPublicProjectByShareId(req.params.shareId);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // All project routes require authentication
 router.use(authenticate);
 
@@ -55,6 +75,53 @@ router.delete('/:id', async (req, res, next) => {
     res.json({ success: true, message: result.message });
   } catch (error) {
     next(error);
+  }
+});
+
+// Toggle public share status
+router.put('/:id/share', async (req, res, next) => {
+  try {
+    const data = await projectController.toggleProjectPublic(req.params.id, req.user.id);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// NEW: Spec-compliant versions and sharing routes
+router.get('/:id/versions', async (req, res, next) => {
+  try {
+    const data = await projectController.getVersionHistory(req.params.id, req.user.id);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/versions/restore', async (req, res, next) => {
+  try {
+    const data = await projectController.restoreVersion(req.params.id, req.user.id, req.body.index);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/share', async (req, res, next) => {
+  try {
+    const data = await projectController.enableSharing(req.params.id, req.user.id);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/:id/share', async (req, res, next) => {
+  try {
+    const data = await projectController.disableSharing(req.params.id, req.user.id);
+    res.json({ success: true, data });
+  } catch (err) {
+    next(err);
   }
 });
 

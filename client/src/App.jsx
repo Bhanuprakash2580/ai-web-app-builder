@@ -5,6 +5,7 @@ import LandingPage from './pages/LandingPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import BuilderPage from './pages/BuilderPage.jsx';
+import SharedPage from './pages/SharedPage.jsx';
 import Navbar from './components/Navbar.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -25,6 +26,7 @@ function App() {
       <Routes>
         <Route path="/" element={user ? <Navigate to="/dashboard" /> : <LandingPage />} />
         <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <LoginPage />} />
+        <Route path="/share/:shareId" element={<SharedPage />} />
         <Route
           path="/dashboard"
           element={
